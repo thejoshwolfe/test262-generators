@@ -12,6 +12,199 @@ output_path = "test"
 def main():
 
     generate_tests(
+        path_prefix="language/expressions/exponentiation/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-exp-operator-runtime-semantics-evaluation",
+            "description": "exponentiation operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) ** 1n, 2n, %(message)s);',
+                   'assert.sameValue(1n **   %(value)s  , 1n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) ** 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n **   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/multiplication/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-multiplicative-operators-runtime-semantics-evaluation",
+            "description": "multiplication operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) * 2n, 4n, %(message)s);',
+                   'assert.sameValue(2n *   %(value)s  , 4n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) * 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n *   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/division/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-multiplicative-operators-runtime-semantics-evaluation",
+            "description": "division operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) / 2n, 1n, %(message)s);',
+                   'assert.sameValue(2n /   %(value)s  , 1n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) / 1n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n /   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/modulus/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-multiplicative-operators-runtime-semantics-evaluation",
+            "description": "modulus operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) %% 2n, 0n, %(message)s);',
+                   'assert.sameValue(2n %%   %(value)s  , 0n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) %% 1n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n %%   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/addition/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-addition-operator-plus-runtime-semantics-evaluation",
+            "description": "addition operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) + 1n, 3n, %(message)s);',
+                   'assert.sameValue(1n +   %(value)s  , 3n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) + 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n +   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/subtraction/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-subtraction-operator-minus-runtime-semantics-evaluation",
+            "description": "subtraction operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) - 1n, 1n, %(message)s);',
+                   'assert.sameValue(3n -   %(value)s  , 1n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) - 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n -   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/left-shift/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-left-shift-operator-runtime-semantics-evaluation",
+            "description": "left-shift operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) << 1n, 4n, %(message)s);',
+                   'assert.sameValue(1n <<   %(value)s  , 4n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) << 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n <<   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/right-shift/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-signed-right-shift-operator-runtime-semantics-evaluation",
+            "description": "right-shift operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) >> 1n, 1n, %(message)s);',
+                   'assert.sameValue(4n >>   %(value)s  , 1n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) >> 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n >>   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/unsigned-right-shift/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-unsigned-right-shift-operator-runtime-semantics-evaluation",
+            "description": "unsigned-right-shift operator ToNumeric with BigInt operands",
+            "info": "After ToNumeric type coercion, unsigned-right-shift always throws for BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.throws(TypeError, function() { ((%(value)s)) >>> 0n; }, %(message)s);',
+                   'assert.throws(TypeError, function() { 0n >>>   %(value)s  ; }, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) >>> 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n >>>   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/bitwise-and/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-binary-bitwise-operators-runtime-semantics-evaluation",
+            "description": "bitwise-and operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) & 3n, 2n, %(message)s);',
+                   'assert.sameValue(3n &   %(value)s  , 2n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) & 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n &   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/bitwise-or/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-binary-bitwise-operators-runtime-semantics-evaluation",
+            "description": "bitwise-or operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) | 1n, 3n, %(message)s);',
+                   'assert.sameValue(1n |   %(value)s  , 3n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) | 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n |   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
+        path_prefix="language/expressions/bitwise-xor/bigint",
+        conversion="ToNumeric-BigInt",
+        frontmatter={
+            "esid": "sec-binary-bitwise-operators-runtime-semantics-evaluation",
+            "description": "bitwise-xor operator ToNumeric with BigInt operands",
+            "features": ["BigInt"],
+        },
+        templates={
+            '2n': ('assert.sameValue(((%(value)s)) ^ 3n, 1n, %(message)s);',
+                   'assert.sameValue(3n ^   %(value)s  , 1n, %(message)s);'),
+            "throws": ('assert.throws(%(error)s, function() { ((%(value)s)) ^ 0n; }, %(message)s);',
+                       'assert.throws(%(error)s, function() { 0n ^   %(value)s  ; }, %(message)s);'),
+        },
+    )
+
+    generate_tests(
         path_prefix="built-ins/BigInt/asIntN/bits-toindex",
         conversion="ToIndex",
         frontmatter={
@@ -106,6 +299,7 @@ def main():
     )
 
     generate_tests(
+        copyright_holder="Igalia, S.L",
         path_prefix="built-ins/DataView/prototype/getBigInt64/to-boolean-littleendian",
         conversion="ToBoolean",
         frontmatter={
@@ -154,6 +348,7 @@ def main():
     )
 
     generate_tests(
+        copyright_holder="Igalia, S.L",
         path_prefix="built-ins/DataView/prototype/getBigInt64/toindex-byteoffset",
         conversion="ToIndex",
         frontmatter={
@@ -198,6 +393,63 @@ def main():
         nominal_value_cases=[
             (2, 'assert.sameValue(sample.getBigInt64(%(value)s), 0x602800080017F00n, %(message)s);'),
             (3, 'assert.sameValue(sample.getBigInt64(%(value)s), 0x2800080017F0001n, %(message)s);'),
+        ],
+    )
+
+    generate_tests(
+        copyright_holder="Igalia, S.L",
+        path_prefix="built-ins/DataView/prototype/getBigUint64/to-boolean-littleendian",
+        conversion="ToBoolean",
+        frontmatter={
+            "esid": "sec-dataview.prototype.getbiguint64",
+            "description": "Boolean littleEndian argument coerced in ToBoolean",
+            "features": ["DataView", "ArrayBuffer", "DataView.prototype.setUint8", "BigInt"],
+        },
+        preamble=(
+            'var buffer = new ArrayBuffer(8);\n'
+            'var sample = new DataView(buffer, 0);\n'
+            'sample.setUint8(7, 0xff);\n'
+            'assert.sameValue(sample.getBigUint64(0), 0xffn, "no argument");\n'
+        ),
+        templates={
+            'false': 'assert.sameValue(sample.getBigUint64(0, %(value)s), 0xffn, %(message)s);',
+            'true': 'assert.sameValue(sample.getBigUint64(0, %(value)s), 0xff00000000000000n, %(message)s);',
+        },
+    )
+
+    generate_tests(
+        copyright_holder="Igalia, S.L",
+        path_prefix="built-ins/DataView/prototype/getBigUint64/toindex-byteoffset",
+        conversion="ToIndex",
+        frontmatter={
+            "esid": "sec-dataview.prototype.getbiguint64",
+            "description": "ToIndex conversions on byteOffset",
+            "features": ["DataView", "ArrayBuffer", "DataView.prototype.setUint8", "BigInt"],
+        },
+        preamble=(
+            'var buffer = new ArrayBuffer(12);\n'
+            'var sample = new DataView(buffer, 0);\n'
+            'sample.setUint8(0, 0x27);\n'
+            'sample.setUint8(1, 0x02);\n'
+            'sample.setUint8(2, 0x06);\n'
+            'sample.setUint8(3, 0x02);\n'
+            'sample.setUint8(4, 0x80);\n'
+            'sample.setUint8(5, 0x00);\n'
+            'sample.setUint8(6, 0x80);\n'
+            'sample.setUint8(7, 0x01);\n'
+            'sample.setUint8(8, 0x7f);\n'
+            'sample.setUint8(9, 0x00);\n'
+            'sample.setUint8(10, 0x01);\n'
+            'sample.setUint8(11, 0x02);\n'
+        ),
+        templates={
+            '0': 'assert.sameValue(sample.getBigUint64(%(value)s), 0x2702060280008001n, %(message)s);',
+            '1': 'assert.sameValue(sample.getBigUint64(%(value)s), 0x20602800080017fn, %(message)s);',
+            "throws": 'assert.throws(%(error)s, function() { sample.getBigUint64(%(value)s); }, %(message)s);',
+        },
+        nominal_value_cases=[
+            (2, 'assert.sameValue(sample.getBigUint64(%(value)s), 0x602800080017F00n, %(message)s);'),
+            (3, 'assert.sameValue(sample.getBigUint64(%(value)s), 0x2800080017F0001n, %(message)s);'),
         ],
     )
 

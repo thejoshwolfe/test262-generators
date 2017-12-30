@@ -15,22 +15,14 @@ generate_tests_required_args = set([
     "path_prefix", "frontmatter", "conversion", "templates"
 ])
 generate_tests_optional_args = set([
-    "preamble", "nominal_value_cases"
+    "preamble", "nominal_value_cases", "copyright_holder"
 ])
 
 def generate_tests(**kwargs):
-    """
-    See CONTRIBUTING.md section "Type coercion tests"
-    """
     for arg in generate_tests_required_args - set(kwargs.keys()): assert False, "Missing required argument: " + arg
     for arg in set(kwargs.keys()) - (generate_tests_required_args | generate_tests_optional_args): assert False, "Unrecognized argument: " + arg
     path_prefix = kwargs["path_prefix"]
     assert not path_prefix.endswith(".js"), "Leave file extension off of path_prefix"
-
-    ##############################################
-    # ATTENTION: If you modify this API, also update the corresponding documentation in CONTRIBUTING.md.
-    ##############################################
-
     frontmatter_args = kwargs["frontmatter"]
     assert type(frontmatter_args) == dict
     for arg in set(frontmatter_args.keys()) - allowed_frontmatter_fields: assert False, "Unrecognized frontmatter field: " + arg
@@ -48,17 +40,24 @@ def generate_tests(**kwargs):
     conversion = conversions[conversion_str]
     templates = kwargs["templates"]
     assert type(templates) == dict
-    assert all(type(template) == str for template in templates.values())
+    assert (
+        all(type(template) == str for template in templates.values()) or
+        all(type(template_set) == tuple and all(type(template) == str for template in template_set) for template_set in templates.values())
+    )
     if conversion.from_nominal_value != None:
         assert "nominal_value_cases" in kwargs, "Missing required argument: nominal_value_cases"
         nominal_value_cases = kwargs["nominal_value_cases"]
         assert type(nominal_value_cases) == list
-        assert all(type(pair) == tuple and type(pair[1]) == str for pair in nominal_value_cases)
+        assert all(type(pair) == tuple and (
+            type(pair[1]) == str or all(type(template) == str for template in pair[1])
+        ) for pair in nominal_value_cases)
     else:
         assert "nominal_value_cases" not in kwargs, "Nominal_value_cases not allowed for this conversion"
         nominal_value_cases = None
     preamble = kwargs.get("preamble", "")
     assert type(preamble) == str
+    copyright_holder = kwargs.get("copyright_holder", "Josh Wolfe")
+    assert type(copyright_holder) == str
 
     if conversion_str == "ToBigInt":
         assert "BigInt" in frontmatter_args["features"]
@@ -70,7 +69,7 @@ def generate_tests(**kwargs):
         try:
             return test_files[category_tag]
         except KeyError:
-            test_file = test_files[category_tag] = TestFile(conversion_str, category_tag, frontmatter_args, preamble)
+            test_file = test_files[category_tag] = TestFile(conversion_str, category_tag, frontmatter_args, preamble, copyright_holder)
             return test_file
     def add_test_case(test_case, templates, category_tag):
         get_test_file(category_tag).append_test_case(test_case, templates)
@@ -93,7 +92,9 @@ def generate_tests(**kwargs):
             category_tag = "-bigint"
         elif "throws" in test_case.flags:
             category_tag = "-errors"
-        add_test_case(test_case, templates, category_tag)
+
+        if "nobare" not in test_case.flags:
+            add_test_case(test_case, templates, category_tag)
 
         if "wrap" in test_case.flags:
             if "BigInt" not in global_features and "BigInt" in test_case.flags:
@@ -155,7 +156,7 @@ allowed_features = set([
 ])
 class TestCase:
     allowed_flags = set([
-        "wrap", "toprimitive", "throws", "err", "MyError",
+        "nobare", "wrap", "toprimitive", "throws", "err", "MyError",
     ]) | allowed_features
     def __init__(self, expected_str, input_str, flags=None, message=None):
         self.expected_str = expected_str
@@ -173,7 +174,7 @@ class Conversion:
         self.primitive_hint = kwargs["primitive_hint"]
 
 class TestFile:
-    def __init__(self, conversion_str, category_tag, frontmatter_args, preamble):
+    def __init__(self, conversion_str, category_tag, frontmatter_args, preamble, copyright_holder):
         self.conversion_str = conversion_str
         self.file_name_suffix = category_tag + ".js"
         self.frontmatter_args = frontmatter_args
@@ -182,6 +183,7 @@ class TestFile:
         self.declarations = []
         self.test_lines = []
         self.used_template_keys = set()
+        self.copyright_holder = copyright_holder
 
     def add_declaration(self, declaration):
         if declaration not in self.declarations:
@@ -200,7 +202,6 @@ class TestFile:
         if "MyError" in test_case.flags:
             self.add_declaration('function MyError() {}')
 
-        # These special cases are documented in CONTRIBUTING.md
         if "throws" in test_case.flags:
             test_line = format_test_line(templates["throws"],
                 error=test_case.expected_str,
@@ -241,7 +242,7 @@ class TestFile:
         frontmatter = {}
         for k, v in self.frontmatter_args.items():
             frontmatter[k] = v
-        frontmatter["flags"] = ["generated"]
+        #frontmatter["flags"] = ["generated"]
         frontmatter["features"] = sorted(set(frontmatter.get("features", [])) | self.features)
 
         result_lines = []
@@ -284,14 +285,12 @@ class TestFile:
                 result_lines.append(field_name + ": " + field_value)
         frontmatter_str = "\n".join(result_lines)
 
-        # This might throw
-        reparsed_frontmatter = yaml.safe_load(frontmatter_str)
-        assert reparsed_frontmatter == frontmatter, "Something caused malformed frontmatter!"
-
         return frontmatter_str
 
     def get_contents(self):
         contents = (
+            '// Copyright (C) 2017 ' + self.copyright_holder + '. All rights reserved.\n' +
+            '// This code is governed by the BSD license found in the LICENSE file.\n' +
             '/*---\n' +
             self.get_frontmatter_str() + '\n' +
             '---*/\n' +
@@ -308,20 +307,37 @@ class TestFile:
         return contents
     def write(self, path_prefix):
         contents = self.get_contents()
-        with open(os.path.join("test", path_prefix + self.file_name_suffix), "w") as f:
+        output_path = os.path.join("test", path_prefix + self.file_name_suffix)
+        with open(output_path, "w") as f:
             f.write(contents)
+        print(output_path)
 
 def format_test_line(template, **kwargs):
     message = kwargs.get("message", None)
-    if message == None:
-        # Remove the message parameter and the comma before it
-        template = template.replace(", %(message)s", "")
-        # Make sure the removal worked
-        try: del kwargs["message"]
-        except KeyError: pass
+    if type(template) == tuple:
+        template_set = template
     else:
-        kwargs["message"] = js_repr(message)
-    return template % kwargs
+        template_set = (template,)
+    lines = []
+    for template in template_set:
+        if message == None:
+            # Remove the message parameter and the comma before it
+            template = template.replace(', %(message)s', '')
+            # Make sure the removal worked
+            try: del kwargs["message"]
+            except KeyError: pass
+        else:
+            kwargs["message"] = js_repr(message)
+        if kwargs["value"].startswith('{'):
+            # need to wrap the value in ()
+            template = template.replace('((%(value)s))', '(%(value)s)')
+        else:
+            # no need to wrap the value in ()
+            template = template.replace('((%(value)s))', '%(value)s')
+        line = template % kwargs
+        if line not in lines:
+            lines.append(line)
+    return '\n'.join(lines)
 
 
 def make_from_nominal_truncator(conversion_str):
@@ -339,9 +355,6 @@ def make_from_nominal_truncator(conversion_str):
 
 nominal_value_tests_go_here = "nominal value tests go here"
 conversions = {
-    ##############################################
-    # ATTENTION: If you make contributions here, also update the corresponding documentation in CONTRIBUTING.md.
-    ##############################################
     "ToBoolean": Conversion(
         tests=[
             TestCase('false', 'false'),
@@ -507,6 +520,14 @@ conversions = {
         ],
         primitive_hint="number",
     ),
+    "ToNumeric-BigInt": Conversion(
+        tests=[
+            TestCase('2n', '2n', flags=["nobare", "wrap", "toprimitive"]),
+            TestCase('TypeError', 'Symbol("1")', flags=["throws", "wrap", "Symbol"], message="ToBigInt: Symbol => TypeError"),
+        ],
+        from_nominal_value=None,
+        primitive_hint="number",
+    ),
     "ToString": Conversion(
         tests=[
             TestCase('', '""'),
@@ -531,9 +552,6 @@ conversions = {
         from_nominal_value=None,
         primitive_hint="string",
     ),
-    ##############################################
-    # ATTENTION: If you make contributions here, also update the corresponding documentation in CONTRIBUTING.md.
-    ##############################################
 }
 
 def basic_primitive_wrappers(test_case, hint):
